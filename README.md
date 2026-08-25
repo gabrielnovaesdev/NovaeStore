@@ -1,14 +1,14 @@
 <div align="center">
-  
+
 # 🛍️ NovaeStore
 
-**E-commerce moderno com integração de IA, pagamentos e backend serverless**
+**Loja virtual moderna com checkout integrado e pagamentos via Pix**
 
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
-[![Google Gemini](https://img.shields.io/badge/Gemini_API-4285F4?style=for-the-badge&logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 
 [Ver no AI Studio](https://ai.studio/apps/d67834cc-8b81-4812-bc2f-1bab6052e3df) · [Reportar Bug](../../issues) · [Sugerir Feature](../../issues)
 
@@ -18,24 +18,26 @@
 
 ## 📋 Sobre o Projeto
 
-O **NovaeStore** é uma aplicação de e-commerce que combina uma interface moderna com recursos de inteligência artificial (via **Gemini API**) e um backend serverless construído sobre **Supabase**, incluindo funções para processamento de pagamentos, status de entrega e webhooks.
+O **NovaeStore** é uma loja virtual (landing page + checkout) construída em **React + TypeScript**, com backend serverless em **Supabase**. O fluxo de compra inclui geração de pagamento via **Pix** (PushinPay), acompanhamento do status do pagamento em tempo real e consulta de entrega.
 
 ## ✨ Funcionalidades
 
-- 🤖 Integração com **Google Gemini** para recursos de IA
-- 💳 Processamento de pagamentos (**PushinPay**)
-- 📦 Acompanhamento de status de entrega
-- 🔔 Webhooks para eventos de pagamento em tempo real
-- ⚡ Backend serverless com **Supabase Functions**
+- 🏠 Landing page completa (Hero, Benefícios, Como Funciona, Depoimentos, FAQ)
+- 🛒 Vitrine de produtos com grid e cards
+- 💳 Checkout com geração de pagamento Pix (PushinPay)
+- ⏱️ Polling automático de status do pagamento
+- 📦 Consulta de status de entrega
+- 🔔 Webhook para confirmação de pagamento em tempo real
+- 🗄️ Banco de dados com migrations (produtos, pedidos, eventos de pagamento) e RLS habilitado
 
 ## 🛠️ Tecnologias Utilizadas
 
 | Camada | Tecnologia |
 |---|---|
-| Frontend | Vite + TypeScript |
-| IA | Google Gemini API |
-| Backend | Supabase (Functions, Migrations) |
-| Pagamentos | PushinPay |
+| Frontend | React + TypeScript + Vite |
+| Backend | Supabase (Edge Functions + Postgres) |
+| Pagamentos | PushinPay (Pix) |
+| Build | npm / Bun |
 
 ## 🚀 Como Rodar Localmente
 
@@ -58,9 +60,9 @@ npm install
 
 **3. Configure as variáveis de ambiente**
 
-Crie (ou edite) o arquivo [`.env.local`](.env.local) na raiz do projeto e adicione sua chave da API do Gemini:
-```env
-GEMINI_API_KEY=sua_chave_aqui
+Copie o arquivo de exemplo e preencha com suas chaves:
+```bash
+cp .env.example .env.local
 ```
 
 **4. Rode a aplicação**
@@ -70,21 +72,40 @@ npm run dev
 
 A aplicação estará disponível em `http://localhost:5173` (ou na porta indicada no terminal).
 
+### Build de produção
+
+```bash
+npm run build
+```
+
+Os arquivos otimizados serão gerados na pasta `dist/`.
+
 ## 📁 Estrutura do Projeto
 
 ```
 NovaeStore/
+├── src/
+│   ├── components/       # Componentes da interface (Hero, Navbar, FAQ, etc.)
+│   ├── data/             # Dados estáticos (produtos)
+│   ├── hooks/            # Hooks customizados (polling de pagamento)
+│   ├── services/         # Integração com API/backend
+│   ├── types/            # Tipagens TypeScript
+│   ├── App.tsx
+│   └── main.tsx
 ├── supabase/
-│   ├── functions/
-│   │   ├── _shared/
-│   │   ├── create-payment/
-│   │   ├── get-delivery/
-│   │   ├── payment-status/
-│   │   └── pushinpay-webhook/
-│   ├── migrations/
+│   ├── functions/        # Edge Functions
+│   │   ├── _shared/          # Código compartilhado (cors, validação, clients)
+│   │   ├── create-payment/   # Geração do pagamento Pix
+│   │   ├── get-delivery/     # Consulta de status de entrega
+│   │   ├── payment-status/   # Consulta de status do pagamento
+│   │   └── pushinpay-webhook/# Webhook de confirmação de pagamento
+│   ├── migrations/       # Migrations do banco (produtos, pedidos, RLS)
 │   └── config.toml
-├── .env.local
-└── package.json
+├── .env.example
+├── index.html
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
 ```
 
 ## 🤝 Contribuindo
