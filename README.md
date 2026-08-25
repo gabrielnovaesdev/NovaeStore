@@ -10,7 +10,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 
-[Ver no AI Studio](https://ai.studio/apps/d67834cc-8b81-4812-bc2f-1bab6052e3df) · [Reportar Bug](../../issues) · [Sugerir Feature](../../issues)
+[Reportar Bug](../../issues) · [Sugerir Feature](../../issues)
 
 </div>
 
