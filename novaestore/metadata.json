@@ -1,0 +1,6 @@
+{
+  "name": "NovaeStore",
+  "description": "Loja digital moderna e premium para games e produtos digitais com pagamento via PIX e confirmação automática.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
