@@ -1,4 +1,5 @@
 <div align="center">
+  
 # 🛍️ NovaeStore
 
 **E-commerce moderno com integração de IA, pagamentos e backend serverless**
