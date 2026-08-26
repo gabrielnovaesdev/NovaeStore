@@ -23,7 +23,11 @@ O **NovaeStore** é uma loja virtual (landing page + checkout) construída em **
 ## ✨ Funcionalidades
 
 - 🏠 Landing page completa (Hero, Benefícios, Como Funciona, Depoimentos, FAQ)
-- 🛒 Vitrine de produtos com grid e cards
+- 🛒 Vitrine de produtos com grid, cards e carrinho lateral (Cart Drawer)
+- 🔔 Notificações de carrinho (Cart Toast) e botão flutuante de carrinho
+- 🌗 Alternância de tema claro/escuro (Theme Toggle)
+- ✨ Animações e efeitos visuais (fundo com partículas, spotlight, marquee de tecnologias)
+- 💀 Skeleton loading para melhor percepção de carregamento
 - 💳 Checkout com geração de pagamento Pix (PushinPay)
 - ⏱️ Polling automático de status do pagamento
 - 📦 Consulta de status de entrega
@@ -84,10 +88,23 @@ Os arquivos otimizados serão gerados na pasta `dist/`.
 
 ```
 NovaeStore/
+├── public/               # Arquivos estáticos públicos
 ├── src/
-│   ├── components/       # Componentes da interface (Hero, Navbar, FAQ, etc.)
+│   ├── assets/           # Imagens e arquivos usados no código
+│   ├── components/       # Componentes da interface
+│   │   ├── skeletons/        # Estados de carregamento (skeleton loading)
+│   │   ├── Hero.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── CartDrawer.tsx    # Carrinho lateral
+│   │   ├── CartToast.tsx     # Notificação de item no carrinho
+│   │   ├── FloatingCartButton.tsx
+│   │   ├── ThemeToggle.tsx   # Alternância claro/escuro
+│   │   ├── ParticleWaveCanvas.tsx  # Efeito visual de fundo
+│   │   ├── TechMarquee.tsx   # Marquee de tecnologias
+│   │   └── ...
+│   ├── context/          # Contextos globais (ex: carrinho, tema)
 │   ├── data/             # Dados estáticos (produtos)
-│   ├── hooks/            # Hooks customizados (polling de pagamento)
+│   ├── hooks/            # Hooks customizados (polling de pagamento, spotlight)
 │   ├── services/         # Integração com API/backend
 │   ├── types/            # Tipagens TypeScript
 │   ├── App.tsx
@@ -125,5 +142,7 @@ Este projeto está sob a licença especificada no arquivo `LICENSE` (adicione um
 ---
 
 <div align="center">
+
+Feito por [Gabriel Novaes](https://github.com/gabrielnovaesdev)
 
 </div>
