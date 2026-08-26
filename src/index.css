@@ -1,1 +1,86 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: dark light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html:not(.dark) {
+  color-scheme: light;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Shimmer animation for highlighted gradient text */
+@keyframes textShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-text-shimmer {
+  background-size: 200% auto;
+  animation: textShimmer 6s ease-in-out infinite;
+}
+
+/* Infinite Marquee Track */
+@keyframes marqueeLeft {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeLeft 32s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Button Light Sheen Effect */
+.btn-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-sheen::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  transition: all 0.75s ease;
+  pointer-events: none;
+}
+
+.btn-sheen:hover::after {
+  left: 130%;
+}
+

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { products, categories } from './data/products';
 import { Product } from './types';
+import { ThemeProvider } from './context/ThemeContext';
+import { CartProvider, useCart } from './context/CartContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
+import { TechMarquee } from './components/TechMarquee';
 import { Offers } from './components/Offers';
 import { ProductGrid } from './components/ProductGrid';
 import { Benefits } from './components/Benefits';
@@ -12,12 +15,28 @@ import { FAQ } from './components/FAQ';
 import { FinalCTA } from './components/FinalCTA';
 import { Footer } from './components/Footer';
 import { CheckoutModal } from './components/CheckoutModal';
+import { CartDrawer } from './components/CartDrawer';
+import { CartToast } from './components/CartToast';
+import { FloatingCartButton } from './components/FloatingCartButton';
 
-export default function App() {
+function StoreApp() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isCartCheckoutOpen, setIsCartCheckoutOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { cart, clearCart } = useCart();
 
-  // Featured game for the weekly spotlight (GTA IV)
-  const spotlightOffer = products.find((p) => p.id === 'gta-iv') || products[0];
+  useEffect(() => {
+    // Perceived loading speed optimization: simulate brief data hydration
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Featured game for the weekly spotlight (GTA VI)
+  const spotlightOffer = products.find((p) => p.id === 'gta-vi') || products[0];
 
   // Top 4 featured games for the hero showcase
   const heroProducts = products.filter((p) => p.featured || p.badge);
@@ -29,10 +48,24 @@ export default function App() {
     }
   };
 
+  const handleBuySingleProduct = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleStartCartCheckout = () => {
+    setIsCartCheckoutOpen(true);
+  };
+
   return (
-    <div className="min-h-screen bg-[#08080c] text-slate-100 selection:bg-indigo-600 selection:text-white relative font-sans">
-      {/* Fixed Sticky Navbar */}
-      <Navbar onExploreClick={() => scrollToSection('produtos')} />
+    <div className="min-h-screen bg-slate-50 dark:bg-[#08080c] text-slate-900 dark:text-slate-100 selection:bg-indigo-600 selection:text-white relative font-sans transition-colors duration-300">
+      {/* Fixed Sticky Navbar with Live Search, Live Cart Badge & Theme Toggle */}
+      <Navbar
+        products={products}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onSelectProduct={handleBuySingleProduct}
+        onExploreClick={() => scrollToSection('produtos')}
+      />
 
       {/* Main Content Sections */}
       <main>
@@ -40,21 +73,28 @@ export default function App() {
         <Hero
           onExploreClick={() => scrollToSection('produtos')}
           onOffersClick={() => scrollToSection('ofertas')}
-          onSelectProduct={(product) => setSelectedProduct(product)}
+          onSelectProduct={handleBuySingleProduct}
           featuredProducts={heroProducts}
+          isLoading={isLoading}
         />
+
+        {/* Dynamic Infinite Marquee of Platforms & Official Guarantees */}
+        <TechMarquee />
 
         {/* Weekly Spotlight Offers */}
         <Offers
           offerProduct={spotlightOffer}
-          onBuyProduct={(product) => setSelectedProduct(product)}
+          onBuyProduct={handleBuySingleProduct}
         />
 
-        {/* Main Catalog & Interactive Category Filter */}
+        {/* Main Catalog & Interactive Category Filter with Instant Search */}
         <ProductGrid
           products={products}
           categories={categories}
-          onBuyProduct={(product) => setSelectedProduct(product)}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onBuyProduct={handleBuySingleProduct}
+          isLoading={isLoading}
         />
 
         {/* Benefits / Por que escolher a NovaeStore? */}
@@ -66,7 +106,7 @@ export default function App() {
         {/* Customer Testimonials */}
         <Testimonials />
 
-        {/* FAQ Accordion (8 items) */}
+        {/* FAQ Accordion */}
         <FAQ />
 
         {/* Final Conversion CTA */}
@@ -76,13 +116,47 @@ export default function App() {
       {/* Footer with legal info */}
       <Footer />
 
-      {/* Embedded Checkout Modal / Bottom Sheet */}
+      {/* Persistent Shopping Cart Slide-over Drawer */}
+      <CartDrawer
+        onCheckout={handleStartCartCheckout}
+        onExploreClick={() => scrollToSection('produtos')}
+      />
+
+      {/* Quick Interactive Toast on Add to Cart */}
+      <CartToast />
+
+      {/* Floating Cart Quick Access Pill */}
+      <FloatingCartButton />
+
+      {/* Embedded Single Product Checkout Modal */}
       {selectedProduct && (
         <CheckoutModal
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
         />
       )}
+
+      {/* Multi-Item Cart Checkout Modal */}
+      {isCartCheckoutOpen && cart.length > 0 && (
+        <CheckoutModal
+          items={cart}
+          onClose={() => setIsCartCheckoutOpen(false)}
+          onSuccess={() => {
+            clearCart();
+          }}
+        />
+      )}
     </div>
   );
 }
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <CartProvider>
+        <StoreApp />
+      </CartProvider>
+    </ThemeProvider>
+  );
+}
+

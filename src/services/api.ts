@@ -4,64 +4,109 @@ import { CreatePaymentResponse, PaymentStatusResponse } from '../types';
  * SERVIÇOS DE API DA NOVAESTORE
  * 
  * Configuração centralizada para requisições de pagamento.
+ * Quando o backend no Antigravity for conectado, as funções abaixo
+ * farão chamadas reais:
+ * - POST /api/create-payment { email, product_id }
+ * - GET /api/payment-status?charge_id={charge_id}
  */
 
-// Utiliza a variável de ambiente para o backend ou localhost no desenvolvimento
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:54321/functions/v1';
+// FUTURE: Substituir pela URL do backend real no Antigravity
+// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+export const MOCK_PAYMENT_DELAY = 10000; // 10 segundos para confirmação automática simulada
+
+// Armazenamento em memória do status de charges ativas para a simulação do frontend
+const chargeStore: Record<string, { status: 'pending' | 'paid' | 'failed'; createdAt: number }> = {};
 
 /**
- * Cria uma cobrança PIX comunicando com a Supabase Edge Function
+ * Cria uma cobrança PIX (Simulada para desenvolvimento)
  */
-export const createPayment = async (email: string, productId: string): Promise<CreatePaymentResponse> => {
-  try {
-    const response = await fetch(`${API_URL}/create-payment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, product_id: productId }),
-    });
+export const createPayment = async (
+  email: string,
+  target: { id?: string; name?: string; price?: number } | { items: { id: string; name: string; price: number; quantity: number }[]; totalAmount: number } | string,
+  optionalPrice?: number
+): Promise<CreatePaymentResponse> => {
+  // Simula latência de rede realista (1.2s)
+  await new Promise((resolve) => setTimeout(resolve, 1200));
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Erro ao criar pagamento');
+  const chargeId = `charge_pix_${Math.random().toString(36).substring(2, 10)}_${Date.now().toString().slice(-4)}`;
+  
+  // Registra a charge como pendente
+  chargeStore[chargeId] = {
+    status: 'pending',
+    createdAt: Date.now()
+  };
+
+  // Agenda aprovação automática do mock após o delay estipulado
+  setTimeout(() => {
+    if (chargeStore[chargeId]) {
+      chargeStore[chargeId].status = 'paid';
     }
+  }, MOCK_PAYMENT_DELAY);
 
-    return await response.json();
-  } catch (error) {
-    console.error('API Error (createPayment):', error);
-    throw error;
+  let totalAmount = 0;
+  let itemsCount = 1;
+  let itemNames: string[] = [];
+  let referenceTag = 'order';
+
+  if (typeof target === 'string') {
+    totalAmount = optionalPrice || 49.90;
+    itemsCount = 1;
+    itemNames = [target];
+    referenceTag = target;
+  } else if ('items' in target && Array.isArray(target.items)) {
+    totalAmount = target.totalAmount;
+    itemsCount = target.items.reduce((acc, item) => acc + item.quantity, 0);
+    itemNames = target.items.map((i) => `${i.quantity}x ${i.name}`);
+    referenceTag = `cart_${itemsCount}items`;
+  } else if ('name' in target && target.name) {
+    totalAmount = target.price || 49.90;
+    itemsCount = 1;
+    itemNames = [target.name];
+    referenceTag = target.id || 'single_item';
   }
+
+  // String PIX no formato padrão Banco Central (EMV Copia e Cola simulada)
+  const sanitizedEmail = email.toLowerCase().trim();
+  const formattedAmount = totalAmount.toFixed(2);
+  const pixPayload = `00020126580014BR.GOV.BCB.PIX0114${sanitizedEmail}0224NovaeStore_${referenceTag}520400005303986540${formattedAmount.length.toString().padStart(2, '0')}${formattedAmount}5802BR5910NovaeStore6009Sao_Paulo62070503***6304${Math.random().toString(16).substring(2, 6).toUpperCase()}`;
+
+  // QR Code URL pública de alta resolução e contraste
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&color=050508&bgcolor=ffffff&data=${encodeURIComponent(pixPayload)}`;
+
+  return {
+    charge_id: chargeId,
+    qr_code_image: qrCodeUrl,
+    pix_copy_paste: pixPayload,
+    product_id: referenceTag,
+    total_amount: totalAmount,
+    items_count: itemsCount,
+    item_names: itemNames,
+  };
 };
 
 /**
  * Consulta o status atual de uma cobrança PIX
  */
 export const getPaymentStatus = async (chargeId: string): Promise<PaymentStatusResponse> => {
-  try {
-    const response = await fetch(`${API_URL}/payment-status?charge_id=${chargeId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  // Simulação rápida de polling (300ms)
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Erro ao consultar status');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('API Error (getPaymentStatus):', error);
-    // Retorna pending por padrão em caso de falha de rede para que o frontend continue tentando
+  const charge = chargeStore[chargeId];
+  if (!charge) {
     return { status: 'pending' };
   }
+
+  return {
+    status: charge.status
+  };
 };
 
 /**
- * Utilitário para forçar aprovação (Apenas Dev/Testes locais se houver rota)
+ * Utilitário de simulação instantânea (para demonstração imediata sem esperar 10s)
  */
 export const forceApprovePayment = (chargeId: string): void => {
-  console.warn('Aprovação forçada no frontend não é mais suportada (usando backend real). Aguarde o Webhook processar o charge:', chargeId);
+  if (chargeStore[chargeId]) {
+    chargeStore[chargeId].status = 'paid';
+  }
 };

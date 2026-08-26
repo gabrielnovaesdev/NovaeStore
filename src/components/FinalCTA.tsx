@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { ArrowRight, Sparkles, Gamepad2 } from 'lucide-react';
 
 interface FinalCTAProps {
@@ -9,12 +10,18 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onExploreClick }) => {
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Background glow and decorative circles */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-r from-indigo-600/20 via-violet-600/20 to-pink-600/10 blur-[120px] pointer-events-none rounded-full" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-pink-500/10 dark:from-indigo-600/20 dark:via-violet-600/20 dark:to-pink-600/10 blur-[120px] pointer-events-none rounded-full" />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="bg-gradient-to-b from-[#131322] to-[#0d0d16] border border-indigo-500/30 rounded-3xl p-8 sm:p-14 text-center shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96, y: 30 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="bg-gradient-to-b from-slate-900 to-indigo-950 dark:from-[#131322] dark:to-[#0d0d16] border border-indigo-500/30 text-white rounded-3xl p-8 sm:p-14 text-center shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-6">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
             Comece a jogar agora mesmo
           </div>
 
@@ -22,7 +29,7 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onExploreClick }) => {
             Encontre seu próximo jogo.
           </h2>
 
-          <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-slate-200 dark:text-slate-300 text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
             Escolha seu produto, faça o pagamento e tenha uma experiência de compra simples e rápida com liberação automática.
           </p>
 
@@ -37,8 +44,9 @@ export const FinalCTA: React.FC<FinalCTAProps> = ({ onExploreClick }) => {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
 };
+

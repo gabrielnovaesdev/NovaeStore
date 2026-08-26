@@ -14,6 +14,11 @@ export type Product = {
   rating?: number;
 };
 
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
 export type CheckoutState = 
   | 'idle' 
   | 'creating_payment' 
@@ -25,7 +30,10 @@ export type CreatePaymentResponse = {
   charge_id: string;
   qr_code_image: string;
   pix_copy_paste: string;
-  product_id: string;
+  product_id?: string;
+  total_amount: number;
+  items_count: number;
+  item_names: string[];
 };
 
 export type PaymentStatusResponse = {
