@@ -167,7 +167,7 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir uma *issue* ou e
 
 ## 📄 Licença
 
-Este projeto está sob a licença especificada no arquivo `LICENSE` (adicione um arquivo de licença caso ainda não tenha um).
+Este projeto está sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
