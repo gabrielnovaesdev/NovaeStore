@@ -1,14 +1,56 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { getSupabaseAdmin } from '../_shared/supabase.ts'
+import { timingSafeEqual } from 'https://deno.land/std@0.168.0/crypto/timing_safe_equal.ts'
+
+// Função para comparação segura (previne timing attacks)
+function secureCompare(a: string, b: string): boolean {
+  const encoder = new TextEncoder();
+  const aBuffer = encoder.encode(a);
+  const bBuffer = encoder.encode(b);
+  
+  // Impede comparação de tempos caso a string não tenha nem o mesmo tamanho
+  if (aBuffer.byteLength !== bBuffer.byteLength) {
+    return false;
+  }
+  
+  return timingSafeEqual(aBuffer, bBuffer);
+}
 
 serve(async (req) => {
-  // PushinPay webhook does not need CORS as it is called server-to-server
   try {
-    const signature = req.headers.get('x-pushinpay-signature')
-    // TODO: Verify signature if PushinPay provides a secret for it.
-    // For now, we process the payload if it's well-formed.
+    const rawBody = await req.text() // Precisamos do corpo cru (string) para validar a assinatura
+    
+    // Verifica se está em modo Demo (sem token configurado)
+    const pushinPayToken = Deno.env.get('PUSHINPAY_TOKEN')
+    const isDemoMode = !pushinPayToken || pushinPayToken.trim() === ''
 
-    const payload = await req.json()
+    if (isDemoMode) {
+      console.log('Modo Demo Ativo: Validação de assinatura ignorada (PUSHINPAY_TOKEN ausente).')
+    } else {
+      // Integração Real - Validação Rigorosa por Header Customizado
+      const headerName = Deno.env.get('PUSHINPAY_WEBHOOK_HEADER_NAME') || 'x-webhook-secret'
+      const receivedSecret = req.headers.get(headerName)
+      const webhookSecret = Deno.env.get('PUSHINPAY_WEBHOOK_SECRET')
+
+      if (!webhookSecret) {
+        console.error('WEBHOOK_SECRET não configurado nas variáveis de ambiente do Supabase.')
+        return new Response(JSON.stringify({ error: 'SERVER_MISCONFIGURED' }), { status: 500 })
+      }
+
+      if (!receivedSecret) {
+        console.error(`Tentativa de acesso não autorizado: Header customizado '${headerName}' ausente.`)
+        return new Response(JSON.stringify({ error: 'UNAUTHORIZED' }), { status: 401 })
+      }
+
+      const isValid = secureCompare(receivedSecret, webhookSecret)
+      
+      if (!isValid) {
+        console.error('Segredo inválido! Possível tentativa de fraude.')
+        return new Response(JSON.stringify({ error: 'UNAUTHORIZED' }), { status: 401 })
+      }
+    }
+
+    const payload = JSON.parse(rawBody)
     console.log('Webhook received:', payload)
 
     const charge_id = payload.id

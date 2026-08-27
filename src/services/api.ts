@@ -3,110 +3,104 @@ import { CreatePaymentResponse, PaymentStatusResponse } from '../types';
 /**
  * SERVIÇOS DE API DA NOVAESTORE
  * 
- * Configuração centralizada para requisições de pagamento.
- * Quando o backend no Antigravity for conectado, as funções abaixo
- * farão chamadas reais:
- * - POST /api/create-payment { email, product_id }
- * - GET /api/payment-status?charge_id={charge_id}
+ * Chamadas reais para as Edge Functions do Supabase.
  */
 
-// FUTURE: Substituir pela URL do backend real no Antigravity
-// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Puxa a URL do Supabase configurada no .env do Vite
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
-export const MOCK_PAYMENT_DELAY = 10000; // 10 segundos para confirmação automática simulada
+if (!SUPABASE_URL) {
+  console.warn("VITE_SUPABASE_URL não configurada no .env!");
+}
 
-// Armazenamento em memória do status de charges ativas para a simulação do frontend
-const chargeStore: Record<string, { status: 'pending' | 'paid' | 'failed'; createdAt: number }> = {};
+const FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 
-/**
- * Cria uma cobrança PIX (Simulada para desenvolvimento)
- */
 export const createPayment = async (
   email: string,
   target: { id?: string; name?: string; price?: number } | { items: { id: string; name: string; price: number; quantity: number }[]; totalAmount: number } | string,
   optionalPrice?: number
 ): Promise<CreatePaymentResponse> => {
-  // Simula latência de rede realista (1.2s)
-  await new Promise((resolve) => setTimeout(resolve, 1200));
-
-  const chargeId = `charge_pix_${Math.random().toString(36).substring(2, 10)}_${Date.now().toString().slice(-4)}`;
-  
-  // Registra a charge como pendente
-  chargeStore[chargeId] = {
-    status: 'pending',
-    createdAt: Date.now()
-  };
-
-  // Agenda aprovação automática do mock após o delay estipulado
-  setTimeout(() => {
-    if (chargeStore[chargeId]) {
-      chargeStore[chargeId].status = 'paid';
-    }
-  }, MOCK_PAYMENT_DELAY);
-
-  let totalAmount = 0;
-  let itemsCount = 1;
-  let itemNames: string[] = [];
-  let referenceTag = 'order';
+  let productId = 'single_item';
 
   if (typeof target === 'string') {
-    totalAmount = optionalPrice || 49.90;
-    itemsCount = 1;
-    itemNames = [target];
-    referenceTag = target;
+    productId = target;
   } else if ('items' in target && Array.isArray(target.items)) {
-    totalAmount = target.totalAmount;
-    itemsCount = target.items.reduce((acc, item) => acc + item.quantity, 0);
-    itemNames = target.items.map((i) => `${i.quantity}x ${i.name}`);
-    referenceTag = `cart_${itemsCount}items`;
+    // A integração real no momento foi construída para produtos únicos.
+    // Futuro: Expandir para checkout de carrinho.
+    productId = 'cart'; 
   } else if ('name' in target && target.name) {
-    totalAmount = target.price || 49.90;
-    itemsCount = 1;
-    itemNames = [target.name];
-    referenceTag = target.id || 'single_item';
+    productId = target.id || 'single_item';
   }
 
-  // String PIX no formato padrão Banco Central (EMV Copia e Cola simulada)
-  const sanitizedEmail = email.toLowerCase().trim();
-  const formattedAmount = totalAmount.toFixed(2);
-  const pixPayload = `00020126580014BR.GOV.BCB.PIX0114${sanitizedEmail}0224NovaeStore_${referenceTag}520400005303986540${formattedAmount.length.toString().padStart(2, '0')}${formattedAmount}5802BR5910NovaeStore6009Sao_Paulo62070503***6304${Math.random().toString(16).substring(2, 6).toUpperCase()}`;
+  const response = await fetch(`${FUNCTIONS_URL}/create-payment`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      product_id: productId
+    })
+  });
 
-  // QR Code URL pública de alta resolução e contraste
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&color=050508&bgcolor=ffffff&data=${encodeURIComponent(pixPayload)}`;
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Erro ao criar pagamento.');
+  }
 
   return {
-    charge_id: chargeId,
-    qr_code_image: qrCodeUrl,
-    pix_copy_paste: pixPayload,
-    product_id: referenceTag,
-    total_amount: totalAmount,
-    items_count: itemsCount,
-    item_names: itemNames,
+    charge_id: data.charge_id,
+    qr_code_image: data.qr_code_image || `data:image/png;base64,${data.qr_code_base64}`,
+    pix_copy_paste: data.pix_copy_paste,
+    product_id: data.product_id,
+    total_amount: data.amount_cents / 100, // Converte centavos para reais
+    items_count: 1,
+    item_names: ['Produto'],
   };
 };
 
-/**
- * Consulta o status atual de uma cobrança PIX
- */
 export const getPaymentStatus = async (chargeId: string): Promise<PaymentStatusResponse> => {
-  // Simulação rápida de polling (300ms)
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  const response = await fetch(`${FUNCTIONS_URL}/payment-status?charge_id=${chargeId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
 
-  const charge = chargeStore[chargeId];
-  if (!charge) {
-    return { status: 'pending' };
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Erro ao consultar status do pagamento.');
   }
 
   return {
-    status: charge.status
+    status: data.status
   };
 };
 
-/**
- * Utilitário de simulação instantânea (para demonstração imediata sem esperar 10s)
- */
-export const forceApprovePayment = (chargeId: string): void => {
-  if (chargeStore[chargeId]) {
-    chargeStore[chargeId].status = 'paid';
+export const getDelivery = async (chargeId: string): Promise<{ delivery_url: string; product_name: string }> => {
+  const response = await fetch(`${FUNCTIONS_URL}/get-delivery`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ charge_id: chargeId })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Erro ao obter entrega.');
   }
+
+  return {
+    delivery_url: data.delivery_url,
+    product_name: data.product_name
+  };
+};
+
+// Mantido apenas para não quebrar componentes que possam importar, mas não tem efeito real no backend
+export const forceApprovePayment = (chargeId: string): void => {
+  console.log('Force approve desabilitado no ambiente de produção.');
 };
