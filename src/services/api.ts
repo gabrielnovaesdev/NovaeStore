@@ -20,84 +20,58 @@ export const createPayment = async (
   target: { id?: string; name?: string; price?: number } | { items: { id: string; name: string; price: number; quantity: number }[]; totalAmount: number } | string,
   optionalPrice?: number
 ): Promise<CreatePaymentResponse> => {
-  let productId = 'single_item';
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      let productId = 'single_item';
+      let amount = 0;
+      let itemsCount = 1;
+      let itemNames = ['Produto'];
 
-  if (typeof target === 'string') {
-    productId = target;
-  } else if ('items' in target && Array.isArray(target.items)) {
-    // A integração real no momento foi construída para produtos únicos.
-    // Futuro: Expandir para checkout de carrinho.
-    productId = 'cart'; 
-  } else if ('name' in target && target.name) {
-    productId = target.id || 'single_item';
-  }
+      if (typeof target === 'string') {
+        productId = target;
+        amount = optionalPrice || 99.90;
+      } else if ('items' in target && Array.isArray(target.items)) {
+        productId = 'cart';
+        amount = target.totalAmount;
+        itemsCount = target.items.length;
+        itemNames = target.items.map(i => i.name);
+      } else if ('name' in target && target.name) {
+        productId = target.id || 'single_item';
+        amount = target.price || 99.90;
+        itemNames = [target.name];
+      }
 
-  const response = await fetch(`${FUNCTIONS_URL}/create-payment`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email,
-      product_id: productId
-    })
+      resolve({
+        charge_id: `ch_${Math.random().toString(36).substr(2, 9)}`,
+        qr_code_image: 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426655440000520400005303986540510.005802BR5913NovaeStore BR6009Sao Paulo62070503***6304A1B2',
+        pix_copy_paste: '00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426655440000520400005303986540510.005802BR5913NovaeStore BR6009Sao Paulo62070503***6304A1B2',
+        product_id: productId,
+        total_amount: amount,
+        items_count: itemsCount,
+        item_names: itemNames,
+      });
+    }, 1500);
   });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao criar pagamento.');
-  }
-
-  return {
-    charge_id: data.charge_id,
-    qr_code_image: data.qr_code_image || `data:image/png;base64,${data.qr_code_base64}`,
-    pix_copy_paste: data.pix_copy_paste,
-    product_id: data.product_id,
-    total_amount: data.amount_cents / 100, // Converte centavos para reais
-    items_count: 1,
-    item_names: ['Produto'],
-  };
 };
 
 export const getPaymentStatus = async (chargeId: string): Promise<PaymentStatusResponse> => {
-  const response = await fetch(`${FUNCTIONS_URL}/payment-status?charge_id=${chargeId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    }
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Retorna 'pending' indefinidamente no mock, forçando o uso do botão "Aprovar agora"
+      resolve({ status: 'pending' });
+    }, 800);
   });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao consultar status do pagamento.');
-  }
-
-  return {
-    status: data.status
-  };
 };
 
 export const getDelivery = async (chargeId: string): Promise<{ delivery_url: string; product_name: string }> => {
-  const response = await fetch(`${FUNCTIONS_URL}/get-delivery`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ charge_id: chargeId })
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        delivery_url: 'https://google.com',
+        product_name: 'Chave de Ativação do Jogo'
+      });
+    }, 1000);
   });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Erro ao obter entrega.');
-  }
-
-  return {
-    delivery_url: data.delivery_url,
-    product_name: data.product_name
-  };
 };
 
 // Mantido apenas para não quebrar componentes que possam importar, mas não tem efeito real no backend
