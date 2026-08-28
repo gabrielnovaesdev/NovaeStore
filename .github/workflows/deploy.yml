@@ -36,7 +36,7 @@ jobs:
       - name: Build project
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        run: npm run build
+        run: npm run build -- --base=/NovaeStore/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
