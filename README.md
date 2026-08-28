@@ -16,7 +16,7 @@
 [![VS Code](https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/)
 [![Claude](https://img.shields.io/badge/Claude-D97757?style=for-the-badge&logo=claude&logoColor=white)](https://claude.ai/)
 
-[Reportar Bug](../../issues) · [Sugerir Feature](../../issues)
+[Acessar a Loja](https://gabrielnovaesdev.github.io/NovaeStore/) · [Reportar Bug](../../issues) · [Sugerir Feature](../../issues)
 
 </div>
 
