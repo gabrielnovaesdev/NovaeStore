@@ -4,12 +4,35 @@ import { isValidEmail } from '../_shared/validation.ts'
 import { createPixCharge } from '../_shared/pushinpay.ts'
 import { getSupabaseAdmin } from '../_shared/supabase.ts'
 
+const rateLimitCache = new Map<string, { count: number, resetAt: number }>();
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    // 1. Rate Limit & Bot Protection (Max 5 requests per minute per IP)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown_ip';
+    const now = Date.now();
+    const record = rateLimitCache.get(ip);
+    
+    if (record && now < record.resetAt) {
+      if (record.count >= 5) {
+        console.warn(`Rate limit exceeded for IP: ${ip}`);
+        return buildCorsResponse({ error: 'RATE_LIMIT_EXCEEDED', message: 'Muitas requisições. Tente novamente em 1 minuto.' }, 429)
+      }
+      record.count++;
+    } else {
+      rateLimitCache.set(ip, { count: 1, resetAt: now + 60000 });
+    }
+
+    // Cleanup very large maps periodically to prevent memory leaks in the edge node
+    if (rateLimitCache.size > 1000) {
+      for (const [key, value] of rateLimitCache.entries()) {
+        if (now > value.resetAt) rateLimitCache.delete(key);
+      }
+    }
     const { email, product_id } = await req.json()
 
     // Validation

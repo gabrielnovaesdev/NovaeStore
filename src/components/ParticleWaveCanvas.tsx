@@ -70,18 +70,17 @@ export const ParticleWaveCanvas: React.FC = () => {
 
     const initParticles = () => {
       particles = [];
-      const density = window.innerWidth < 768 ? 34 : 22; // Balanced grid spacing for continuous wave surface
+      const isMobile = window.innerWidth < 768;
+      // Drastic reduction of particle density on mobile to ensure fluid 60fps
+      const density = isMobile ? 48 : 22; 
       const cols = Math.ceil(width / density) + 2;
       const rows = Math.ceil(height / density) + 2;
 
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
-          // Subtle organic jitter for natural flow
           const x = (i - 1) * density + (Math.random() * 6 - 3);
           const y = (j - 1) * density + (Math.random() * 6 - 3);
-          // Very fine, airy micro-dots (0.65px to 1.2px)
           const baseRadius = Math.random() * 0.55 + 0.65;
-          // Phase offset creates iridescent spatial wave patterns
           const phaseOffset = (x * 0.0015 + y * 0.0018 + Math.random() * 0.2) % 1;
 
           particles.push({
@@ -97,7 +96,6 @@ export const ParticleWaveCanvas: React.FC = () => {
             angle: Math.random() * Math.PI * 2,
             speed: 0.004 + Math.random() * 0.006,
             waveOffset: (x * 0.0035) + (y * 0.0035),
-            // High fluid friction and ultra-gentle spring for weightless floating stardust
             friction: 0.958 + Math.random() * 0.012,
             springFactor: 0.010 + Math.random() * 0.004,
             energy: 0,
@@ -112,7 +110,10 @@ export const ParticleWaveCanvas: React.FC = () => {
       const rect = container.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      
+      const isMobile = window.innerWidth < 768;
+      // Force DPR to 1 on mobile to avoid 3x rendering cost on retina screens
+      dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
 
       canvas.width = width * dpr;
       canvas.height = height * dpr;

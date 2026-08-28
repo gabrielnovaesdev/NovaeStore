@@ -203,28 +203,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'bg-white/75 dark:bg-[#0a0a14]/75 backdrop-blur-xl border-slate-200/60 dark:border-white/5 shadow-sm'
             }`}
           >
-            <div className="flex items-center justify-between h-16 sm:h-18 px-4 sm:px-6 gap-3 lg:gap-6">
+            <div className="flex items-center justify-between h-16 sm:h-18 px-3 sm:px-6 gap-2 sm:gap-3 lg:gap-4 xl:gap-6">
               {/* Brand Logo with Modern Holographic Glow */}
               <a
                 href="#inicio"
                 id="brand-logo"
-                className="flex items-center gap-3 group cursor-pointer flex-shrink-0"
+                className="flex items-center gap-2 sm:gap-3 group cursor-pointer flex-shrink lg:flex-shrink-0 min-w-0"
                 onClick={(e) => handleNavClick(e, '#inicio')}
               >
-                <div className="relative">
+                <div className="relative shrink-0">
                   <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-400 rounded-xl blur-sm opacity-60 group-hover:opacity-100 transition duration-300 group-hover:scale-105" />
-                  <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center shadow-inner border border-white/20">
-                    <Gamepad2 className="w-5 h-5 text-white stroke-[2.2] group-hover:rotate-12 transition-transform duration-300" />
+                  <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center shadow-inner border border-white/20">
+                    <Gamepad2 className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.2] group-hover:rotate-12 transition-transform duration-300" />
                   </div>
                 </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
+                    <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 dark:text-white leading-none truncate">
                       Novae<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500 dark:from-indigo-400 dark:to-violet-400">Store</span>
                     </span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0 hidden sm:block" />
                   </div>
-                  <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-500">
+                  <span className="hidden sm:block text-[9px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-500 truncate">
                     Jogos Digitais • PIX 24h
                   </span>
                 </div>
@@ -379,7 +379,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
 
               {/* Desktop Modern Segmented Navigation Links (Large Screens) */}
-              <nav className="hidden lg:flex items-center gap-1 bg-slate-100/70 dark:bg-[#12121e]/70 p-1.5 rounded-full border border-slate-200/80 dark:border-white/5 flex-shrink-0">
+              <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 bg-slate-100/70 dark:bg-[#12121e]/70 p-1.5 rounded-full border border-slate-200/80 dark:border-white/5 flex-shrink min-w-0">
                 {navLinks.map((link) => {
                   const isActive = activeSection === link.id;
                   return (
@@ -388,7 +388,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       href={link.href}
                       id={`nav-link-${link.id}`}
                       onClick={(e) => handleNavClick(e, link.href)}
-                      className={`relative px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                      className={`relative px-2.5 xl:px-3.5 py-1.5 rounded-full text-[11px] xl:text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
                         isActive
                           ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-600/25'
                           : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
@@ -396,7 +396,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     >
                       <span>{link.label}</span>
                       {link.badge && (
-                        <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-tighter ${
+                        <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-tighter hidden xl:block ${
                           isActive 
                             ? 'bg-white/20 text-white' 
                             : link.badgeColor ? 'bg-rose-500 text-white' : 'bg-indigo-600 text-white'
@@ -410,7 +410,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </nav>
 
               {/* Right Action Cluster: Theme, Cart, CTA (Desktop) */}
-              <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+              <div className="hidden lg:flex items-center gap-2 xl:gap-3 flex-shrink-0">
                 {/* Theme Toggle */}
                 <ThemeToggle id="navbar-theme-toggle-desktop" />
 
@@ -441,7 +441,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   id="navbar-cta-btn"
                   onClick={onExploreClick}
-                  className="relative group overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] active:scale-95 flex items-center gap-1.5"
+                  className="relative group overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs xl:text-sm font-bold px-3 xl:px-5 py-2.5 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] active:scale-95 flex items-center gap-1.5 whitespace-nowrap"
                 >
                   <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform" />
                   <Zap className="w-4 h-4 text-indigo-200 fill-indigo-200 group-hover:rotate-12 transition-transform" />
@@ -450,7 +450,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
 
               {/* Mobile & Tablet Right Bar Controls */}
-              <div className="flex items-center gap-2 lg:hidden">
+              <div className="flex items-center gap-1 sm:gap-2 lg:hidden shrink-0">
                 <ThemeToggle id="navbar-theme-toggle-tablet-mobile" />
 
                 <button
