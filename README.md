@@ -12,9 +12,7 @@
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Google AI Studio](https://img.shields.io/badge/Google_AI_Studio-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.studio/)
 [![VS Code](https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/)
-[![Claude](https://img.shields.io/badge/Claude-D97757?style=for-the-badge&logo=claude&logoColor=white)](https://claude.ai/)
 
 [Acessar a Loja](https://gabrielnovaesdev.github.io/NovaeStore/) · [Reportar Bug](../../issues) · [Sugerir Feature](../../issues)
 
@@ -54,8 +52,6 @@ O **NovaeStore** é uma loja virtual (landing page + checkout) construída em **
 
 ## ⚙️ Ferramentas de Desenvolvimento
 
-- 🧠 **Google AI Studio** — geração e refinamento de código com IA
-- 🤖 **Claude** — apoio no desenvolvimento e organização do projeto
 - 🖥️ **VS Code** — desenvolvimento e edição do projeto
 - 🗄️ **Supabase** — backend, banco de dados e Edge Functions
 - 🐙 **Git & GitHub** — versionamento e hospedagem do código
